@@ -20,20 +20,15 @@ body {
 }
 
 h1 {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   letter-spacing: 2px;
 }
 
-.scoreboard {
+.layout {
   display: flex;
-  justify-content: space-between;
-  max-width: 400px;
-  margin: 0 auto 12px;
-  font-size: 18px;
-}
-
-.scoreboard b {
-  color: #2ecc71;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .game-area {
@@ -41,18 +36,17 @@ h1 {
   display: inline-block;
 }
 
-canvas {
-  background: #16202e;
-  border: 3px solid #2ecc71;
+canvas#board {
+  background: #10161f;
+  border: 3px solid #3498db;
   border-radius: 8px;
   display: block;
-  margin: 0 auto;
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.82);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -66,7 +60,7 @@ canvas {
 }
 
 .overlay-content h2 {
-  color: #2ecc71;
+  color: #3498db;
   margin-bottom: 10px;
 }
 
@@ -77,35 +71,63 @@ canvas {
 }
 
 .big-btn {
-  background: #2ecc71;
+  background: #3498db;
   color: #fff;
   border: none;
   border-radius: 50px;
-  padding: 14px 40px;
+  padding: 14px 36px;
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
-  transition: transform 0.1s;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
 }
 
 .big-btn:active {
   transform: scale(0.95);
 }
 
-/* 螢幕方向按鈕 */
-.dpad {
-  display: grid;
-  grid-template-columns: repeat(3, 64px);
-  gap: 8px;
-  justify-content: center;
-  margin-top: 18px;
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 110px;
 }
 
-.dpad-btn {
-  width: 64px;
-  height: 64px;
-  font-size: 26px;
+.panel-box {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #95a5a6;
+}
+
+.panel-box b {
+  display: block;
+  font-size: 22px;
+  color: #3498db;
+  margin-top: 4px;
+}
+
+canvas#next {
+  background: #10161f;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+/* 手機操作按鈕 */
+.mobile-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.ctrl-btn {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
   border: none;
   border-radius: 12px;
   background: #34495e;
@@ -113,8 +135,14 @@ canvas {
   cursor: pointer;
 }
 
-.dpad-btn:active {
-  background: #2ecc71;
+.ctrl-btn:active {
+  background: #3498db;
+}
+
+.ctrl-btn.danger {
+  width: auto;
+  padding: 0 18px;
+  background: #c0392b;
 }
 
 .hint {
@@ -128,4 +156,21 @@ kbd {
   border-radius: 4px;
   padding: 2px 6px;
   font-family: inherit;
+}
+
+@media (max-width: 480px) {
+  .layout {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .panel {
+    min-width: 84px;
+  }
+  .panel-box {
+    padding: 6px;
+    font-size: 12px;
+  }
+  .panel-box b {
+    font-size: 16px;
+  }
 }

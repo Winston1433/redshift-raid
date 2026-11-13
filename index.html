@@ -3,39 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>貪吃蛇 Snake Game</title>
+  <title>俄羅斯方塊 Tetris</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>🐍 貪吃蛇</h1>
-    <div class="scoreboard">
-      <span>分數：<b id="score">0</b></span>
-      <span>最高分：<b id="highscore">0</b></span>
-    </div>
+    <h1>🧱 俄羅斯方塊</h1>
 
-    <div class="game-area">
-      <canvas id="game" width="400" height="400"></canvas>
-      <div id="overlay" class="overlay">
-        <div class="overlay-content">
-          <h2 id="overlay-title">🐍 貪吃蛇</h2>
-          <p id="overlay-text">吃到紅色小球就加分<br>不要撞到牆壁和自己</p>
-          <button id="start-btn" class="big-btn">▶ 開始遊戲</button>
+    <div class="layout">
+      <div class="game-area">
+        <canvas id="board" width="240" height="480"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-content">
+            <h2 id="overlay-title">🧱 俄羅斯方塊</h2>
+            <p id="overlay-text">移動與旋轉方塊<br>湊滿一整行就能消掉得分<br>堆到頂就輸了！</p>
+            <button id="start-btn" class="big-btn">▶ 開始遊戲</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-box">
+          <div>分數</div><b id="score">0</b>
+        </div>
+        <div class="panel-box">
+          <div>最高分</div><b id="highscore">0</b>
+        </div>
+        <div class="panel-box">
+          <div>等級</div><b id="level">1</b>
+        </div>
+        <div class="panel-box">
+          <div>下一個</div>
+          <canvas id="next" width="96" height="96"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- 螢幕方向按鈕（手機也能玩） -->
-    <div class="dpad">
-      <div></div>
-      <button class="dpad-btn" data-dir="up">↑</button>
-      <div></div>
-      <button class="dpad-btn" data-dir="left">←</button>
-      <button class="dpad-btn" data-dir="down">↓</button>
-      <button class="dpad-btn" data-dir="right">→</button>
+    <!-- 螢幕按鈕（手機也能玩） -->
+    <div class="mobile-controls">
+      <button class="ctrl-btn" data-act="left">←</button>
+      <button class="ctrl-btn" data-act="rotate">↻</button>
+      <button class="ctrl-btn" data-act="right">→</button>
+      <button class="ctrl-btn" data-act="down">⬇</button>
+      <button class="ctrl-btn danger" data-act="drop">⤓ 落底</button>
     </div>
 
-    <p class="hint">也可以用電腦鍵盤的方向鍵 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 控制</p>
+    <p class="hint">
+      電腦鍵盤：<kbd>←</kbd><kbd>→</kbd> 移動　<kbd>↑</kbd> 旋轉　<kbd>↓</kbd> 加速落下　<kbd>空白鍵</kbd> 直接落底
+    </p>
   </div>
   <script src="game.js"></script>
 </body>
