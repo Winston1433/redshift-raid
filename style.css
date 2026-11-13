@@ -88,3 +88,11 @@ h1 {
   h1 { font-size: clamp(2.4rem, 11svh, 3.4rem); }
   #summary, #briefControls { margin-block: 6px; }
 }
+
+#difficultyPicker { margin: 0 0 1rem; }
+#difficultyPicker label { display: block; margin-bottom: .3rem; font-size: .8rem; font-weight: 850; }
+#difficulty { min-height: 40px; width: min(190px, 100%); padding: .35em .6em; border: 2px solid var(--green); background: #fff7df; color: var(--green); font: inherit; }
+#difficultyHint { margin: .36rem 0 0; font-size: .8rem; }
+@media (max-height: 500px) {
+  #difficultyPicker { margin-bottom: .55rem; }
+}

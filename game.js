@@ -1,15 +1,31 @@
 'use strict';
 
 const ui = Object.fromEntries(
-  ['flight', 'briefing', 'headline', 'summary', 'launch', 'hud', 'health', 'points', 'pause', 'status', 'progress', 'pulse', 'charge']
+  ['flight', 'briefing', 'headline', 'summary', 'launch', 'hud', 'health', 'points', 'pause', 'status', 'progress', 'pulse', 'charge', 'difficultyPicker', 'difficulty', 'difficultyHint']
     .map(id => [id, document.getElementById(id)])
 );
 const canvas = ui.flight;
 const pen = canvas.getContext('2d', { alpha: false });
 const pressed = new Set();
 const flightKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyX']);
-const phases = ['進入峽谷', '突破封鎖', '母艦交戰'];
-const flightLength = 38;
+const stages = [
+  { name: '赤砂峽谷', duration: 18, interval: 1.28, heavyEvery: 6, bossHp: 32, spread: [-.28, 0, .28], terrain: 0 },
+  { name: '黃昏封鎖線', duration: 22, interval: .99, heavyEvery: 4, bossHp: 46, spread: [-.48, -.24, 0, .24, .48], terrain: 1 },
+  { name: '黑曜母艦', duration: 25, interval: .8, heavyEvery: 3, bossHp: 62, spread: [-.66, -.44, -.22, 0, .22, .44, .66], terrain: 2 }
+];
+const difficulties = {
+  easy: { health: 5, speed: .78, cadence: 1.26, bossArmor: .77, hint: '5 格耐久，敵方射擊較慢。' },
+  normal: { health: 4, speed: 1, cadence: 1, bossArmor: 1, hint: '4 格耐久，標準彈速。' },
+  hard: { health: 3, speed: 1.23, cadence: .78, bossArmor: 1.24, hint: '3 格耐久，彈幕更快，母艦裝甲更厚。' }
+};
+const landscapes = [
+  { ground: '#b85d43', facets: ['#984630', '#a85139', '#bd6749', '#c87551', '#d58b60', '#b46245', '#a9543a'],
+    cliffs: ['#683326', '#803b2b', '#a34c34', '#da9064'], ridge: '#aa5940' },
+  { ground: '#a77a44', facets: ['#80532d', '#946634', '#b58044', '#c89151', '#d4a05b', '#ae7440', '#966336'],
+    cliffs: ['#463127', '#654231', '#805330', '#bf9151'], ridge: '#946237' },
+  { ground: '#55516b', facets: ['#423d57', '#50445c', '#61556e', '#6a5b73', '#7a6a83', '#595169', '#514660'],
+    cliffs: ['#282334', '#393043', '#4b3d57', '#75637e'], ridge: '#55445e' }
+];
 const cliffSpacing = 96;
 const playerColor = '#e9f6c5';
 let w;
@@ -51,16 +67,18 @@ function show(next) {
   const playing = next === 'flight';
   ui.hud.hidden = !playing;
   ui.briefing.hidden = playing;
+  ui.difficultyPicker.hidden = next === 'paused' || next === 'cleared';
   if (playing) {
     canvas.focus({ preventScroll: true });
     return;
   }
   const screens = {
     paused: ['任務暫停', '戰機已進入待命。', '繼續出擊'],
+    cleared: () => ['關卡完成', `下一關 · ${stages[run.stageIndex + 1].name}。耐久恢復一格，脈衝充滿。`, '下一關'],
     lost: ['機體失聯', `本次得分 ${run.score.toLocaleString('zh-TW')}`, '再飛一次'],
-    won: ['航道開通', `母艦已摧毀，最終得分 ${run.score.toLocaleString('zh-TW')}`, '再飛一次']
+    won: ['全關通過', `黑曜母艦已摧毀，最終得分 ${run.score.toLocaleString('zh-TW')}`, '再飛一次']
   };
-  const [heading, summary, label] = screens[next];
+  const [heading, summary, label] = next === 'cleared' ? screens.cleared() : screens[next];
   ui.headline.textContent = heading;
   ui.summary.textContent = summary;
   ui.launch.firstChild.textContent = label + ' ';
@@ -68,22 +86,37 @@ function show(next) {
 }
 
 function start() {
-  run = {
-    elapsed: 0, nextEnemy: 1, spawned: 0, score: 0, health: 4, energy: 100,
-    blast: 0, boss: null, player: { x: w * .5, y: h * .78, wait: 0, grace: 0, tilt: 0 },
+  const difficulty = difficulties[ui.difficulty.value];
+  run = { stageIndex: 0, difficulty, score: 0, health: difficulty.health };
+  beginStage();
+}
+
+function beginStage() {
+  const stage = stages[run.stageIndex];
+  Object.assign(run, {
+    stage, elapsed: 0, nextEnemy: 1, spawned: 0, energy: 100, blast: 0, boss: null,
+    player: { x: w * .5, y: h * .78, wait: 0, grace: 0, tilt: 0 },
     enemies: [], bullets: [], bolts: [], particles: []
-  };
+  });
   updateHud();
   show('flight');
 }
 
+function advanceStage() {
+  run.stageIndex++;
+  run.health = Math.min(run.difficulty.health, run.health + 1);
+  beginStage();
+}
+
 function updateHud() {
-  const phase = run.boss ? 2 : run.elapsed >= flightLength / 2 ? 1 : 0;
-  ui.status.textContent = phases[phase];
-  const ratio = run.boss ? run.boss.hp / run.boss.max : run.elapsed / flightLength;
-  ui.progress.style.width = `${clamp(ratio, 0, 1) * 100}%`;
+  const progress = run.boss ? run.boss.hp / run.boss.max : run.elapsed / run.stage.duration;
+  const status = run.boss ? '母艦耐久' : run.stage.name;
+  ui.status.textContent = `${run.stageIndex + 1} / ${stages.length} · ${status}`;
+  ui.progress.style.width = `${clamp(progress, 0, 1) * 100}%`;
+  ui.health.setAttribute('aria-valuemax', run.difficulty.health);
   ui.health.setAttribute('aria-valuenow', run.health);
   for (const [index, bar] of Array.from(ui.health.children).entries()) {
+    bar.hidden = index >= run.difficulty.health;
     bar.classList.toggle('empty', index >= run.health);
   }
   ui.points.textContent = String(run.score).padStart(5, '0');
@@ -106,7 +139,7 @@ function damage(target, amount) {
   run.score += target.boss ? 2500 : target.heavy ? 240 : 110;
   run.energy = Math.min(100, run.energy + (target.heavy ? 11 : 6));
   burst(target.x, target.y, '#fff0a5', target.boss ? 75 : 17);
-  if (target.boss) show('won');
+  if (target.boss) show(run.stageIndex === stages.length - 1 ? 'won' : 'cleared');
 }
 
 function pulse() {
@@ -129,9 +162,9 @@ function hit() {
 
 function spawn(boss) {
   const index = run.spawned++;
-  const heavy = !boss && index % 5 === 4;
+  const heavy = !boss && (index + 1) % run.stage.heavyEvery === 0;
   const home = boss ? w * .5 : w * (.17 + noise(index + 38) * .66);
-  const hp = boss ? 68 : heavy ? 5 : 2;
+  const hp = boss ? Math.round(run.stage.bossHp * run.difficulty.bossArmor) : heavy ? 5 : 2;
   const enemy = {
     x: home, y: boss ? -74 : -32, home, age: 0, boss, heavy,
     hp, max: hp, r: boss ? 52 : heavy ? 24 : 15,
@@ -168,10 +201,10 @@ function movePlayer(dt) {
 
 function aim(enemy) {
   const angle = Math.atan2(run.player.y - enemy.y, run.player.x - enemy.x);
-  const spread = enemy.boss ? [-.54, -.27, 0, .27, .54] : enemy.heavy ? [-.23, 0, .23] : [0];
+  const spread = enemy.boss ? run.stage.spread : enemy.heavy ? [-.23, 0, .23] : [0];
   for (const offset of spread) {
     const direction = angle + offset;
-    const speed = enemy.boss ? 245 : 195;
+    const speed = (enemy.boss ? 245 : 195) * run.difficulty.speed;
     run.bolts.push({ x: enemy.x, y: enemy.y + 10, dx: Math.cos(direction) * speed, dy: Math.sin(direction) * speed, r: enemy.boss ? 7 : 5 });
   }
 }
@@ -185,11 +218,11 @@ function update(dt) {
   run.energy = Math.min(100, run.energy + dt * 2.5);
   run.blast = Math.max(0, run.blast - dt);
   movePlayer(dt);
-  if (!run.boss && run.elapsed >= flightLength) {
+  if (!run.boss && run.elapsed >= run.stage.duration) {
     spawn(true);
   } else if (!run.boss && run.elapsed >= run.nextEnemy) {
     spawn(false);
-    run.nextEnemy = run.elapsed + (run.elapsed < 19 ? 1.12 : .79);
+    run.nextEnemy = run.elapsed + run.stage.interval * run.difficulty.cadence;
   }
   for (const enemy of run.enemies) {
     if (enemy.hp <= 0) continue;
@@ -198,7 +231,7 @@ function update(dt) {
       enemy.y = Math.min(enemy.y + dt * 100, h * .23);
       enemy.x = w * (.5 + Math.sin(enemy.age * .95) * .29);
     } else {
-      enemy.y += dt * (enemy.heavy ? 100 : 133);
+      enemy.y += dt * (enemy.heavy ? 100 : 133) * run.difficulty.speed;
       enemy.x = clamp(enemy.home + Math.sin(enemy.age * 2.2) * 48, 22, w - 22);
       if (overlap(enemy, run.player, 15)) {
         enemy.hp = 0;
@@ -211,7 +244,7 @@ function update(dt) {
     enemy.wait -= dt;
     if (enemy.wait <= 0 && enemy.y > 24 && (enemy.boss || enemy.y < run.player.y - 50)) {
       aim(enemy);
-      enemy.wait = enemy.boss ? (enemy.hp < 34 ? .72 : 1.04) : 2.1;
+      enemy.wait = (enemy.boss ? (enemy.hp < enemy.max / 2 ? .72 : 1.04) : 2.1) * run.difficulty.cadence;
     }
   }
   for (const bullet of run.bullets) {
@@ -255,9 +288,9 @@ function terrain() {
   const drift = clock * 125;
   const row = Math.floor(drift / cliffSpacing);
   const offset = drift % cliffSpacing;
-  pen.fillStyle = '#b85d43';
+  const { ground, facets, cliffs, ridge } = landscapes[run?.stage.terrain ?? 0];
+  pen.fillStyle = ground;
   pen.fillRect(0, 0, w, h);
-  const palette = ['#984630', '#a85139', '#bd6749', '#c87551', '#d58b60', '#b46245', '#a9543a'];
   const step = Math.max(85, w / 11);
   const rows = Math.ceil(h / cliffSpacing) + 2;
   for (let i = -1; i < rows; i++) {
@@ -267,8 +300,8 @@ function terrain() {
       const x = col * step;
       const k = seed * 31 + col;
       const corner = (noise(k + 40) - .5) * step;
-      shape(palette[Math.floor(noise(k + 133) * palette.length)], [[x, y], [x + step + 1, y], [x + corner + step * .44, y + cliffSpacing + 1], [x, y + cliffSpacing + 1]]);
-      shape(palette[Math.floor(noise(k + 317) * palette.length)], [[x + step, y], [x + step + 1, y + cliffSpacing + 1], [x + corner + step * .44 - 1, y + cliffSpacing + 1]]);
+      shape(facets[Math.floor(noise(k + 133) * facets.length)], [[x, y], [x + step + 1, y], [x + corner + step * .44, y + cliffSpacing + 1], [x, y + cliffSpacing + 1]]);
+      shape(facets[Math.floor(noise(k + 317) * facets.length)], [[x + step, y], [x + step + 1, y + cliffSpacing + 1], [x + corner + step * .44 - 1, y + cliffSpacing + 1]]);
     }
     for (const side of [-1, 1]) {
       const shore = (seed, layer) => {
@@ -279,10 +312,9 @@ function terrain() {
       for (let layer = 3; layer >= 0; layer--) {
         const top = shore(seed, layer);
         const bottom = shore(seed + 1, layer);
-        const shades = ['#683326', '#803b2b', '#a34c34', '#da9064'];
-        shape(shades[layer], [[edge, y], [top, y], [bottom, y + cliffSpacing + 1], [edge, y + cliffSpacing + 1]]);
+        shape(cliffs[layer], [[edge, y], [top, y], [bottom, y + cliffSpacing + 1], [edge, y + cliffSpacing + 1]]);
         if (layer === 1) {
-          shape('#aa5940', [[edge, y], [top, y], [bottom, y + cliffSpacing * .81]]);
+          shape(ridge, [[edge, y], [top, y], [bottom, y + cliffSpacing * .81]]);
         }
       }
     }
@@ -398,7 +430,14 @@ function movePointer(event) {
   pointer.y = event.clientY - rect.top - (event.pointerType === 'touch' ? 38 : 0);
 }
 
-ui.launch.addEventListener('click', () => mode === 'paused' ? pause() : start());
+ui.difficulty.addEventListener('change', () => {
+  ui.difficultyHint.textContent = difficulties[ui.difficulty.value].hint;
+});
+ui.launch.addEventListener('click', () => {
+  if (mode === 'paused') pause();
+  else if (mode === 'cleared') advanceStage();
+  else start();
+});
 ui.pause.addEventListener('click', pause);
 ui.pulse.addEventListener('click', () => {
   pulse();
