@@ -1,63 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TETRIS · 俄羅斯方塊</title>
-  <link rel="stylesheet" href="style.css?v=2" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2ead5">
+  <title>赤砂突襲 — Redshift Raid</title>
+  <link rel="stylesheet" href="./style.css?v=redshift-1">
+  <script src="./game.js?v=redshift-1" defer></script>
 </head>
 <body>
-  <div class="container">
-    <header class="topbar">
-      <h1>TETRIS</h1>
-      <span class="subtitle">俄羅斯方塊</span>
-    </header>
-
-    <div class="layout">
-      <div class="side left">
-        <div class="stat">
-          <label>SCORE</label>
-          <b id="score">0</b>
-        </div>
-        <div class="stat">
-          <label>BEST</label>
-          <b id="highscore">0</b>
-        </div>
-        <div class="stat">
-          <label>LEVEL</label>
-          <b id="level">1</b>
-        </div>
+  <main>
+    <canvas id="flight" aria-label="赤砂峽谷飛行戰場" tabindex="-1"></canvas>
+    <section id="briefing" aria-labelledby="headline">
+      <div class="mast"><span class="mark" aria-hidden="true">✦</span> <span>REDSHIFT RAID</span></div>
+      <div class="brief">
+        <h1 id="headline">赤砂<br>突襲</h1>
+        <p id="summary">低空穿越赤砂峽谷，摧毀封鎖航道的無人機母艦。</p>
+        <button id="launch" type="button">出擊 <span aria-hidden="true">↗</span></button>
+        <p id="briefControls"><span class="desktop">方向鍵／WASD 移動 · 空白鍵射擊 · X 脈衝</span><span class="touch">拖曳戰機移動並開火 · 點「脈衝」清除彈幕</span></p>
       </div>
-
-      <div class="game-area">
-        <canvas id="board" width="300" height="600"></canvas>
-        <div id="overlay" class="overlay">
-          <div class="overlay-content">
-            <h2 id="overlay-title">TETRIS</h2>
-            <p id="overlay-text">排滿一整行即可消除<br>堆到頂端就結束</p>
-            <button id="start-btn" class="big-btn">開始遊戲</button>
-          </div>
-        </div>
+    </section>
+    <div id="hud" hidden>
+      <div class="readout">
+        <span>機體</span>
+        <div class="health" id="health" role="meter" aria-label="機體耐久" aria-valuemin="0" aria-valuemax="4" aria-valuenow="4"><i></i><i></i><i></i><i></i></div>
       </div>
-
-      <div class="side right">
-        <div class="stat">
-          <label>NEXT</label>
-          <canvas id="next" width="120" height="120"></canvas>
-        </div>
+      <div class="readout score"><span>分數</span><strong id="points">00000</strong></div>
+      <button id="pause" type="button" aria-label="暫停">Ⅱ</button>
+      <div class="navigation">
+        <span id="status">進入峽谷</span>
+        <div class="track" aria-hidden="true"><div id="progress"></div></div>
       </div>
+      <button id="pulse" type="button"><strong>脈衝</strong><span id="charge">100%</span></button>
     </div>
-
-    <div class="mobile-controls">
-      <button class="ctrl-btn" data-act="left" aria-label="左移">←</button>
-      <button class="ctrl-btn" data-act="rotate" aria-label="旋轉">⟳</button>
-      <button class="ctrl-btn" data-act="right" aria-label="右移">→</button>
-      <button class="ctrl-btn" data-act="down" aria-label="加速">↓</button>
-      <button class="ctrl-btn wide" data-act="drop" aria-label="落底">落底</button>
-    </div>
-
-    <p class="hint">鍵盤：<kbd>←</kbd><kbd>→</kbd> 移動 · <kbd>↑</kbd> 旋轉 · <kbd>↓</kbd> 加速 · <kbd>Space</kbd> 落底</p>
-  </div>
-  <script src="game.js?v=2"></script>
+  </main>
 </body>
 </html>
