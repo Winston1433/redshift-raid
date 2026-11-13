@@ -15,7 +15,6 @@ body {
 }
 
 .container {
-  position: relative;
   text-align: center;
   padding: 20px;
 }
@@ -37,6 +36,11 @@ h1 {
   color: #2ecc71;
 }
 
+.game-area {
+  position: relative;
+  display: inline-block;
+}
+
 canvas {
   background: #16202e;
   border: 3px solid #2ecc71;
@@ -45,27 +49,10 @@ canvas {
   margin: 0 auto;
 }
 
-.controls {
-  margin-top: 14px;
-  color: #95a5a6;
-  font-size: 14px;
-}
-
-kbd {
-  background: #34495e;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-family: inherit;
-}
-
 .overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.75);
-  width: 400px;
-  height: 400px;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -80,9 +67,65 @@ kbd {
 
 .overlay-content h2 {
   color: #2ecc71;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .overlay-content p {
   color: #bdc3c7;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.big-btn {
+  background: #2ecc71;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 40px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+  transition: transform 0.1s;
+}
+
+.big-btn:active {
+  transform: scale(0.95);
+}
+
+/* 螢幕方向按鈕 */
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.dpad-btn {
+  width: 64px;
+  height: 64px;
+  font-size: 26px;
+  border: none;
+  border-radius: 12px;
+  background: #34495e;
+  color: #ecf0f1;
+  cursor: pointer;
+}
+
+.dpad-btn:active {
+  background: #2ecc71;
+}
+
+.hint {
+  margin-top: 14px;
+  color: #95a5a6;
+  font-size: 14px;
+}
+
+kbd {
+  background: #34495e;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: inherit;
 }
