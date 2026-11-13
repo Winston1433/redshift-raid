@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>貪吃蛇 Snake Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🐍 貪吃蛇 Snake</h1>
+    <div class="scoreboard">
+      <span>分數：<b id="score">0</b></span>
+      <span>最高分：<b id="highscore">0</b></span>
+    </div>
+    <canvas id="game" width="400" height="400"></canvas>
+    <div class="controls">
+      <p>用 <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 控制方向</p>
+      <p>按 <kbd>空白鍵</kbd> 開始 / 暫停</p>
+    </div>
+    <div id="overlay" class="overlay">
+      <div class="overlay-content">
+        <h2 id="overlay-title">準備好了嗎？</h2>
+        <p id="overlay-text">按空白鍵開始遊戲</p>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

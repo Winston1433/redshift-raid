@@ -1,0 +1,88 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(135deg, #1e2433, #2c3e50);
+  color: #ecf0f1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  position: relative;
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  max-width: 400px;
+  margin: 0 auto 12px;
+  font-size: 18px;
+}
+
+.scoreboard b {
+  color: #2ecc71;
+}
+
+canvas {
+  background: #16202e;
+  border: 3px solid #2ecc71;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+}
+
+.controls {
+  margin-top: 14px;
+  color: #95a5a6;
+  font-size: 14px;
+}
+
+kbd {
+  background: #34495e;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: inherit;
+}
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.75);
+  width: 400px;
+  height: 400px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay-content h2 {
+  color: #2ecc71;
+  margin-bottom: 8px;
+}
+
+.overlay-content p {
+  color: #bdc3c7;
+}
