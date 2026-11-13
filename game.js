@@ -1,4 +1,4 @@
-/* ================= 俄羅斯方塊 Tetris ================= */
+/* ================= TETRIS v2 ================= */
 
 const board = document.getElementById("board");
 const ctx = board.getContext("2d");
@@ -7,7 +7,7 @@ const nctx = nextCv.getContext("2d");
 
 const COLS = 10;
 const ROWS = 20;
-const CELL = 24; // board 240x480
+const CELL = 30; // board 300x600
 
 const scoreEl = document.getElementById("score");
 const highscoreEl = document.getElementById("highscore");
@@ -17,15 +17,14 @@ const overlayTitle = document.getElementById("overlay-title");
 const overlayText = document.getElementById("overlay-text");
 const startBtn = document.getElementById("start-btn");
 
-/* 方塊形狀（每個是 4x4 / 3x3 矩陣，顏色索引） */
 const SHAPES = [
-  { m: [[1, 1, 1, 1]], c: "#00f0f0" },                 // I
-  { m: [[1, 1], [1, 1]], c: "#f0f000" },               // O
-  { m: [[0, 1, 0], [1, 1, 1]], c: "#a000f0" },         // T
-  { m: [[0, 1, 1], [1, 1, 0]], c: "#00f000" },         // S
-  { m: [[1, 1, 0], [0, 1, 1]], c: "#f00000" },         // Z
-  { m: [[1, 0, 0], [1, 1, 1]], c: "#f0a000" },         // J
-  { m: [[0, 0, 1], [1, 1, 1]], c: "#0000f0" },         // L
+  { m: [[1, 1, 1, 1]], c: "#22d3ee" },                 // I 青
+  { m: [[1, 1], [1, 1]], c: "#facc15" },               // O 黃
+  { m: [[0, 1, 0], [1, 1, 1]], c: "#c084fc" },         // T 紫
+  { m: [[0, 1, 1], [1, 1, 0]], c: "#4ade80" },         // S 綠
+  { m: [[1, 1, 0], [0, 1, 1]], c: "#f87171" },         // Z 紅
+  { m: [[1, 0, 0], [1, 1, 1]], c: "#60a5fa" },         // J 藍
+  { m: [[0, 0, 1], [1, 1, 1]], c: "#fb923c" },         // L 橘
 ];
 
 let grid, cur, nextPiece, score, highScore, level, lines, running, timer, dropInterval;
@@ -62,7 +61,6 @@ function collide(p, nx, ny, mat) {
 }
 
 function rotate(m) {
-  // 順時針旋轉矩陣
   const rows = m.length;
   const cols = m[0].length;
   const out = Array.from({ length: cols }, () => Array(rows).fill(0));
@@ -78,7 +76,6 @@ function tryRotate() {
     cur.m = rm;
     return;
   }
-  // 簡單的左右牆踢
   for (const dx of [-1, 1, -2, 2]) {
     if (!collide(cur, cur.x + dx, cur.y, rm)) {
       cur.x += dx;
@@ -86,6 +83,12 @@ function tryRotate() {
       return;
     }
   }
+}
+
+function ghostY() {
+  let y = cur.y;
+  while (!collide(cur, cur.x, y + 1)) y++;
+  return y;
 }
 
 function lock() {
@@ -105,7 +108,7 @@ function clearLines() {
       grid.splice(y, 1);
       grid.unshift(Array(COLS).fill(null));
       cleared++;
-      y++; // 同一行再檢查一次
+      y++;
     }
   }
   if (cleared > 0) {
@@ -149,16 +152,35 @@ function hardDrop() {
 
 /* ---------- 畫面 ---------- */
 
-function drawCell(c, x, y, size) {
-  c.fillStyle = "rgba(255,255,255,0.08)";
-  c.fillRect(x + 1, y + 1, size - 2, size - 2);
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawBlock(c, px, py, size, color, alpha) {
+  c.globalAlpha = alpha === undefined ? 1 : alpha;
+  c.fillStyle = color;
+  roundRect(c, px + 1.5, py + 1.5, size - 3, size - 3, 5);
+  c.fill();
+  // 頂部高光
+  c.globalAlpha = (alpha === undefined ? 1 : alpha) * 0.25;
+  c.fillStyle = "#ffffff";
+  roundRect(c, px + 3, py + 3, size - 6, (size - 6) / 3, 4);
+  c.fill();
+  c.globalAlpha = 1;
 }
 
 function draw() {
   ctx.clearRect(0, 0, board.width, board.height);
 
   // 格線
-  ctx.strokeStyle = "rgba(255,255,255,0.04)";
+  ctx.strokeStyle = "rgba(148,163,184,0.07)";
+  ctx.lineWidth = 1;
   for (let i = 1; i < COLS; i++) {
     ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, board.height); ctx.stroke();
   }
@@ -166,39 +188,58 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(board.width, i * CELL); ctx.stroke();
   }
 
-  // 已固定的方塊
-  for (let y = 0; y < ROWS; y++) {
-    for (let x = 0; x < COLS; x++) {
-      if (grid[y][x]) {
-        ctx.fillStyle = grid[y][x];
-        ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
-      }
+  if (!grid) return;
+
+  // 幽靈方塊（落點預覽）
+  if (running) {
+    const gy = ghostY();
+    if (gy !== cur.y) {
+      cur.m.forEach((row, y) =>
+        row.forEach((v, x) => {
+          if (v && gy + y >= 0) {
+            const px = (cur.x + x) * CELL;
+            const py = (gy + y) * CELL;
+            ctx.strokeStyle = cur.c;
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = 1.5;
+            roundRect(ctx, px + 3, py + 3, CELL - 6, CELL - 6, 5);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+        })
+      );
     }
   }
 
-  // 目前下落中的方塊
-  cur.m.forEach((row, y) =>
-    row.forEach((v, x) => {
-      if (v && cur.y + y >= 0) {
-        ctx.fillStyle = cur.c;
-        ctx.fillRect((cur.x + x) * CELL + 1, (cur.y + y) * CELL + 1, CELL - 2, CELL - 2);
-      }
-    })
-  );
+  // 已固定的方塊
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (grid[y][x]) drawBlock(ctx, x * CELL, y * CELL, CELL, grid[y][x]);
+    }
+  }
+
+  // 目前方塊
+  if (cur) {
+    cur.m.forEach((row, y) =>
+      row.forEach((v, x) => {
+        if (v && cur.y + y >= 0) {
+          drawBlock(ctx, (cur.x + x) * CELL, (cur.y + y) * CELL, CELL, cur.c);
+        }
+      })
+    );
+  }
 }
 
 function drawNext() {
   nctx.clearRect(0, 0, nextCv.width, nextCv.height);
+  if (!nextPiece) return;
   const m = nextPiece.m;
-  const size = 20;
+  const size = 24;
   const ox = (nextCv.width - m[0].length * size) / 2;
   const oy = (nextCv.height - m.length * size) / 2;
   m.forEach((row, y) =>
     row.forEach((v, x) => {
-      if (v) {
-        nctx.fillStyle = nextPiece.c;
-        nctx.fillRect(ox + x * size + 1, oy + y * size + 1, size - 2, size - 2);
-      }
+      if (v) drawBlock(nctx, ox + x * size, oy + y * size, size, nextPiece.c);
     })
   );
 }
@@ -235,11 +276,11 @@ function gameOver() {
     localStorage.setItem("tetrisHighScore", highScore);
     highscoreEl.textContent = highScore;
   }
-  overlayTitle.textContent = "遊戲結束 💀";
+  overlayTitle.textContent = "GAME OVER";
   overlayText.innerHTML = isNewRecord
-    ? `🎉 新紀錄！你拿了 <b>${score} 分</b>（等級 ${level}）`
-    : `你拿了 <b>${score} 分</b>（等級 ${level}）`;
-  startBtn.textContent = "🔄 再玩一次";
+    ? `🎉 新紀錄！<b>${score}</b> 分 · 等級 ${level}`
+    : `得到 <b>${score}</b> 分 · 等級 ${level}`;
+  startBtn.textContent = "再玩一次";
   overlay.classList.remove("hidden");
 }
 
@@ -252,7 +293,7 @@ document.addEventListener("keydown", (e) => {
   if (!running) return;
   if (k === "arrowleft") move(-1);
   else if (k === "arrowright") move(1);
-  else if (k === "arrowdown") { softDrop(); }
+  else if (k === "arrowdown") softDrop();
   else if (k === "arrowup") { tryRotate(); draw(); }
   else if (e.key === " ") hardDrop();
 });
@@ -269,7 +310,6 @@ document.querySelectorAll(".ctrl-btn").forEach((btn) => {
   });
 });
 
-// 手機滑動：左右滑移動、上滑旋轉、下滑加速
 let touchStart = null;
 board.addEventListener("touchstart", (e) => {
   touchStart = e.touches[0];

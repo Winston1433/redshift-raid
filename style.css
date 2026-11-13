@@ -1,57 +1,150 @@
+/* ============ TETRIS · 介面樣式 v2 ============ */
+
+:root {
+  --bg-1: #0b0f1a;
+  --bg-2: #141b2e;
+  --accent: #5eead4;
+  --accent-2: #38bdf8;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --card: rgba(255, 255, 255, 0.04);
+  --border: rgba(148, 163, 184, 0.15);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
-  font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
-  background: linear-gradient(135deg, #1e2433, #2c3e50);
-  color: #ecf0f1;
+  font-family: "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  background:
+    radial-gradient(1000px 600px at 50% -10%, rgba(56, 189, 248, 0.12), transparent 60%),
+    radial-gradient(800px 500px at 90% 110%, rgba(94, 234, 212, 0.08), transparent 60%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2));
+  color: var(--text);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px 12px;
 }
 
 .container {
+  width: fit-content;
+  margin: 0 auto;
   text-align: center;
-  padding: 20px;
 }
 
-h1 {
-  margin-bottom: 14px;
-  letter-spacing: 2px;
+/* ---------- 頂部標題 ---------- */
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
 }
+
+.topbar h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 10px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 4px;
+}
+
+/* ---------- 主版面 ---------- */
 
 .layout {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   justify-content: center;
   align-items: flex-start;
 }
 
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 108px;
+  padding-top: 4px;
+}
+
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.stat label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.stat b {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+canvas#next {
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* ---------- 遊戲畫布 ---------- */
+
 .game-area {
   position: relative;
   display: inline-block;
+  line-height: 0;
 }
 
 canvas#board {
-  background: #10161f;
-  border: 3px solid #3498db;
-  border-radius: 8px;
-  display: block;
+  background: rgba(2, 6, 14, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(94, 234, 212, 0.08),
+    0 24px 60px rgba(0, 0, 0, 0.5);
 }
+
+/* ---------- 覆蓋層 ---------- */
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.82);
-  border-radius: 8px;
+  border-radius: 16px;
+  background: rgba(4, 8, 16, 0.72);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
+  line-height: normal;
 }
 
 .overlay.hidden {
@@ -60,117 +153,107 @@ canvas#board {
 }
 
 .overlay-content h2 {
-  color: #3498db;
-  margin-bottom: 10px;
+  font-size: 26px;
+  letter-spacing: 6px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .overlay-content p {
-  color: #bdc3c7;
-  line-height: 1.8;
-  margin-bottom: 20px;
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 24px;
+  font-size: 15px;
 }
 
 .big-btn {
-  background: #3498db;
-  color: #fff;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #04121a;
   border: none;
-  border-radius: 50px;
-  padding: 14px 36px;
-  font-size: 20px;
-  font-weight: bold;
+  border-radius: 999px;
+  padding: 13px 42px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
+}
+
+.big-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
 }
 
 .big-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 110px;
-}
+/* ---------- 手機按鈕 ---------- */
 
-.panel-box {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-  color: #95a5a6;
-}
-
-.panel-box b {
-  display: block;
-  font-size: 22px;
-  color: #3498db;
-  margin-top: 4px;
-}
-
-canvas#next {
-  background: #10161f;
-  border-radius: 6px;
-  margin-top: 6px;
-}
-
-/* 手機操作按鈕 */
 .mobile-controls {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: center;
-  margin-top: 16px;
-  flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 .ctrl-btn {
-  width: 56px;
-  height: 56px;
-  font-size: 22px;
-  border: none;
-  border-radius: 12px;
-  background: #34495e;
-  color: #ecf0f1;
+  min-width: 54px;
+  height: 54px;
+  font-size: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--text);
   cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
 }
 
 .ctrl-btn:active {
-  background: #3498db;
+  background: rgba(94, 234, 212, 0.2);
+  transform: scale(0.94);
 }
 
-.ctrl-btn.danger {
-  width: auto;
-  padding: 0 18px;
-  background: #c0392b;
+.ctrl-btn.wide {
+  padding: 0 20px;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  border-color: rgba(94, 234, 212, 0.35);
 }
+
+/* ---------- 底部提示 ---------- */
 
 .hint {
-  margin-top: 14px;
-  color: #95a5a6;
-  font-size: 14px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 kbd {
-  background: #34495e;
-  border-radius: 4px;
-  padding: 2px 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 7px;
   font-family: inherit;
+  font-size: 12px;
+  margin: 0 2px;
 }
 
-@media (max-width: 480px) {
-  .layout {
-    flex-direction: row;
-    gap: 8px;
-  }
-  .panel {
-    min-width: 84px;
-  }
-  .panel-box {
-    padding: 6px;
-    font-size: 12px;
-  }
-  .panel-box b {
-    font-size: 16px;
-  }
+/* ---------- 手機版 ---------- */
+
+@media (max-width: 560px) {
+  body { padding: 16px 8px; }
+  .topbar h1 { font-size: 26px; letter-spacing: 6px; }
+  .layout { gap: 10px; }
+  .side { width: 76px; gap: 8px; }
+  .stat { padding: 8px 4px; border-radius: 10px; }
+  .stat b { font-size: 16px; }
+  canvas#board { width: 62vw; height: auto; }
+  .overlay-content p { font-size: 13px; }
+  .ctrl-btn { min-width: 46px; height: 46px; }
 }

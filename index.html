@@ -3,55 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>俄羅斯方塊 Tetris</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>TETRIS · 俄羅斯方塊</title>
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
   <div class="container">
-    <h1>🧱 俄羅斯方塊</h1>
+    <header class="topbar">
+      <h1>TETRIS</h1>
+      <span class="subtitle">俄羅斯方塊</span>
+    </header>
 
     <div class="layout">
+      <div class="side left">
+        <div class="stat">
+          <label>SCORE</label>
+          <b id="score">0</b>
+        </div>
+        <div class="stat">
+          <label>BEST</label>
+          <b id="highscore">0</b>
+        </div>
+        <div class="stat">
+          <label>LEVEL</label>
+          <b id="level">1</b>
+        </div>
+      </div>
+
       <div class="game-area">
-        <canvas id="board" width="240" height="480"></canvas>
+        <canvas id="board" width="300" height="600"></canvas>
         <div id="overlay" class="overlay">
           <div class="overlay-content">
-            <h2 id="overlay-title">🧱 俄羅斯方塊</h2>
-            <p id="overlay-text">移動與旋轉方塊<br>湊滿一整行就能消掉得分<br>堆到頂就輸了！</p>
-            <button id="start-btn" class="big-btn">▶ 開始遊戲</button>
+            <h2 id="overlay-title">TETRIS</h2>
+            <p id="overlay-text">排滿一整行即可消除<br>堆到頂端就結束</p>
+            <button id="start-btn" class="big-btn">開始遊戲</button>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-box">
-          <div>分數</div><b id="score">0</b>
-        </div>
-        <div class="panel-box">
-          <div>最高分</div><b id="highscore">0</b>
-        </div>
-        <div class="panel-box">
-          <div>等級</div><b id="level">1</b>
-        </div>
-        <div class="panel-box">
-          <div>下一個</div>
-          <canvas id="next" width="96" height="96"></canvas>
+      <div class="side right">
+        <div class="stat">
+          <label>NEXT</label>
+          <canvas id="next" width="120" height="120"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- 螢幕按鈕（手機也能玩） -->
     <div class="mobile-controls">
-      <button class="ctrl-btn" data-act="left">←</button>
-      <button class="ctrl-btn" data-act="rotate">↻</button>
-      <button class="ctrl-btn" data-act="right">→</button>
-      <button class="ctrl-btn" data-act="down">⬇</button>
-      <button class="ctrl-btn danger" data-act="drop">⤓ 落底</button>
+      <button class="ctrl-btn" data-act="left" aria-label="左移">←</button>
+      <button class="ctrl-btn" data-act="rotate" aria-label="旋轉">⟳</button>
+      <button class="ctrl-btn" data-act="right" aria-label="右移">→</button>
+      <button class="ctrl-btn" data-act="down" aria-label="加速">↓</button>
+      <button class="ctrl-btn wide" data-act="drop" aria-label="落底">落底</button>
     </div>
 
-    <p class="hint">
-      電腦鍵盤：<kbd>←</kbd><kbd>→</kbd> 移動　<kbd>↑</kbd> 旋轉　<kbd>↓</kbd> 加速落下　<kbd>空白鍵</kbd> 直接落底
-    </p>
+    <p class="hint">鍵盤：<kbd>←</kbd><kbd>→</kbd> 移動 · <kbd>↑</kbd> 旋轉 · <kbd>↓</kbd> 加速 · <kbd>Space</kbd> 落底</p>
   </div>
-  <script src="game.js"></script>
+  <script src="game.js?v=2"></script>
 </body>
 </html>
